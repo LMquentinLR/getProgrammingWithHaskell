@@ -1,0 +1,1 @@
+Haskell code created while learning with Get Programming With Haskell by Will Kurt.
