@@ -41,3 +41,16 @@ main = do
   print (haversine (40.7776, -73.9691) (42.6054, -70.7829))
   print (haversine (fromJust $ Map.lookup "New York" locationDB) (fromJust $ Map.lookup "Arkham" locationDB))
   printDistance (haversineMaybe (Map.lookup "New York" locationDB) (Map.lookup "Arkham" locationDB))
+  --- WITH APPLICATIVES
+  let start = Map.lookup "Carcosa" locationDB
+  let end = Map.lookup "Innsmouth" locationDB
+  print (haversine <$> start <*> end)
+  -- IO ()
+  putStrLn "Enter the starting city name:"
+  startingInput <- getLine
+  let startCity = Map.lookup startingInput locationDB
+  putStrLn "Enter the end city name:"
+  endingInput <- getLine
+  let endCity = Map.lookup endingInput locationDB
+  let distance = haversine <$> startCity <*> endCity
+  printDistance distance
