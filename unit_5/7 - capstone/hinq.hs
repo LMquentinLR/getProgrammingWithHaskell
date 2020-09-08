@@ -1,16 +1,16 @@
-import Control.Monad
-import Control.Applicative
+import           Control.Applicative
+import           Control.Monad
 
 ------ TYPES
-data Name = Name 
+data Name = Name
             { firstName :: String
             , lastName  :: String }
 instance Show Name where
   show (Name first last) = mconcat [first, " ", last]
-  
-data GradeLevel = Freshman 
-                | Sophomore 
-                | Junior 
+
+data GradeLevel = Freshman
+                | Sophomore
+                | Junior
                 | Senior deriving (Eq, Ord, Enum, Show)
 
 data Student = Student
@@ -21,7 +21,7 @@ data Student = Student
 data Teacher = Teacher
                { teacherId   :: Int
                , teacherName :: Name } deriving Show
-              
+
 data Course = Course
               { courseId    :: Int
               , courseTitle :: String
@@ -30,11 +30,11 @@ data Course = Course
 data Enrollment = Enrollment
                   { student :: Int
                   , course  :: Int } deriving Show
-              
+
 data HINQ m a b = HINQ (m a -> m b) (m a) (m a -> m a)
                 | HINQ_ (m a -> m b) (m a)
 
------- STATEMENTS               
+------ STATEMENTS
 students :: [Student]
 students = [ (Student 1 Senior    (Name "Audre" "Lorde"))
            , (Student 2 Junior    (Name "Leslie" "Silko"))
@@ -49,7 +49,7 @@ teachers = [ Teacher 100 (Name "Simone" "De Beauvoir")
 
 possibleTeacher :: Maybe Teacher
 possibleTeacher = Just (head teachers)
-           
+
 courses :: [Course]
 courses = [ Course 101 "French"  100
           , Course 201 "English" 200 ]
@@ -70,17 +70,17 @@ enrollments = [ (Enrollment 1 101)
               , (Enrollment 5 101)
               , (Enrollment 6 201) ]
 
--- queries          
-          
+-- queries
+
 query1 :: HINQ [] (Teacher, Course) Name
 query1 = HINQ (_select (teacherName . fst))
               (_join teachers courses teacherId teacher)
               (_where ((=="English") . courseTitle . snd))
-              
+
 query2 :: HINQ [] Teacher Name
 query2 = HINQ_ (_select teacherName)
                teachers
- 
+
 maybeQuery1 :: HINQ Maybe (Teacher, Course) Name
 maybeQuery1 = HINQ (_select (teacherName .fst))
                    (_join possibleTeacher possibleCourse teacherId teacher)
@@ -90,18 +90,18 @@ maybeQuery2 :: HINQ Maybe (Teacher, Course) Name
 maybeQuery2 = HINQ (_select (teacherName .fst))
                    (_join possibleTeacher missingCourse teacherId teacher)
                    (_where ((=="French") . courseTitle . snd))
- 
-studentEnrollmentsQ = HINQ_ (_select (\(st,en) -> 
+
+studentEnrollmentsQ = HINQ_ (_select (\(st,en) ->
                                        (studentName st, course en)))
                             (_join students enrollments studentId student)
-  
+
 studentEnrollments :: [(Name, Int)]
-studentEnrollments = runHINQ studentEnrollmentsQ 
+studentEnrollments = runHINQ studentEnrollmentsQ
 
 englishStudentsQ = HINQ (_select (fst . fst))
                         (_join studentEnrollments courses snd courseId)
                         (_where ((=="English") . courseTitle . snd))
-                        
+
 englishStudents :: [Name]
 englishStudents = runHINQ englishStudentsQ
 
@@ -126,8 +126,8 @@ _join data1 data2 prop1 prop2 = do
   guard ((prop1 (fst dpairs)) == (prop2 (snd dpairs)))
   return dpairs
 
-_hinq selectQuery joinQuery whereQuery = (\joinData -> 
-                                          (\whereResult -> selectQuery whereResult) 
+_hinq selectQuery joinQuery whereQuery = (\joinData ->
+                                          (\whereResult -> selectQuery whereResult)
                                           (whereQuery joinData)
                                          ) joinQuery
 

@@ -1,15 +1,15 @@
-import Control.Monad
+import           Control.Monad
 
 ------ TYPES
-data Name = Name 
+data Name = Name
             { firstName :: String
             , lastName  :: String }
 instance Show Name where
   show (Name first last) = mconcat [first, " ", last]
-  
-data GradeLevel = Freshman 
-                | Sophomore 
-                | Junior 
+
+data GradeLevel = Freshman
+                | Sophomore
+                | Junior
                 | Senior deriving (Eq, Ord, Enum, Show)
 
 data Student = Student
@@ -18,15 +18,15 @@ data Student = Student
                , studentName :: Name } deriving Show
 
 data Teacher = Teacher
-               { teacherId  :: Int
+               { teacherId   :: Int
                , teacherName :: Name } deriving Show
-              
+
 data Course = Course
               { coursedId   :: Int
               , courseTitle :: String
               , teacher     :: Int } deriving Show
 
------- STATEMENTS               
+------ STATEMENTS
 students :: [Student]
 students = [ (Student 1 Senior (Name "Audre" "Lorde"))
            , (Student 2 Junior (Name "Leslie" "Silko"))
@@ -38,7 +38,7 @@ students = [ (Student 1 Senior (Name "Audre" "Lorde"))
 teachers :: [Teacher]
 teachers = [ Teacher 100 (Name "Simone" "De Beauvoir")
            , Teacher 200 (Name "Susan" "Sontag") ]
-           
+
 courses :: [Course]
 courses = [ Course 101 "French" 100
           , Course 201 "English" 200 ]
@@ -47,8 +47,8 @@ joinData = (_join teachers courses teacherId teacher)
 
 whereResult = _where ((=="English") . courseTitle . snd) joinData
 
-selectResult = _select (teacherName . fst) whereResult  
-        
+selectResult = _select (teacherName . fst) whereResult
+
 ------ FUNCTIONS
 
 startsWith :: Char -> String -> Bool
@@ -73,8 +73,8 @@ _join data1 data2 prop1 prop2 = do
   guard ((prop1 (fst dpairs)) == (prop2 (snd dpairs)))
   return dpairs
 
-_hinq selectQuery joinQuery whereQuery = (\joinData -> 
-                                          (\whereResult -> selectQuery whereResult) 
+_hinq selectQuery joinQuery whereQuery = (\joinData ->
+                                          (\whereResult -> selectQuery whereResult)
                                           (whereQuery joinData)
                                          ) joinQuery
 
@@ -82,12 +82,12 @@ finalResult :: [Name]
 finalResult = _hinq (_select (teacherName . fst))
                     (_join teachers courses teacherId teacher)
                     (_where ((=="English") . courseTitle . snd))
-                    
+
 teacherFirstName :: [String]
 teacherFirstName = _hinq (_select firstName)
                          finalResult
                          (_where (\_ -> True))
-                        
+
 ------ MAIN
 main :: IO ()
 main = do
