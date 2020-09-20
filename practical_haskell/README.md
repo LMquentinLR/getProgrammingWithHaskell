@@ -1,0 +1,1 @@
+Code content of the Second Edition of the Practical Haskell book by Alejandro Serrano Mena.
